@@ -96,3 +96,54 @@ print(f"Numerical Difference between methods: {diff:.2e}")
 print(f"Sequential Execution Time: {time_seq * 1000:.3f} ms")
 print(f"WY Execution Time:         {time_wy * 1000:.3f} ms")
 print(f"Speedup Factor:            {time_seq / time_wy:.2f}x")
+
+
+"""
+This script benchmarks two methods for applying a sequence of Householder
+transformations to a batch of input vectors.
+
+Method A (Sequential Loop) applies each Householder transformation one at
+a time, which involves Level 2 operations (matrix-vector products).
+
+Method B (WY Representation) constructs a compact representation of the 
+sequence of Householder transformations, allowing the entire sequence to
+be applied with a small number of Level 3 operations (matrix-matrix products).
+
+This benchmark is a simplified linear-algebra analogue of ideas used in
+Kimi-style delta attention kernels: pack many rank-1 update effects so the
+compute is dominated by GEMM-friendly matrix-matrix operations. Kimi K3 is
+documented as using Kimi Delta Attention, and this script illustrates one key
+efficiency intuition behind that family of methods.
+
+Important limitation of this script: it demonstrates only the kernel-level
+speedup (turning many small update-style operations into GEMM-heavy work). The
+Kimi research also reports a second major speedup from system-level design:
+hybrid KDA/full-attention layering and fixed-size recurrent state that reduce
+KV-cache growth and improve long-context decoding throughput. That second
+effect is not modeled or measured by this benchmark.
+
+Looking back at the history of computing, in the 1980s there was a computer
+architecture problem.  CPUs were getting faster, but memory bandwidth was 
+not keeping up.
+This led to the development of the BLAS (Basic Linear Algebra Subprograms) 
+standard, which defined efficient implementations of common linear algebra
+operations.
+
+In a Back-to-the-Future style moment, in 2026 we are seeing a similar problem
+with GPUs.  The GPUs are getting faster, but memory bandwidth is not keeping
+up.  This is why Level 3 operations (matrix-matrix products) are much faster
+than Level 2 operations (matrix-vector products) on GPUs.  The WY representation 
+allows us to replace many small, bandwidth-limited vector-style updates with a
+few larger matrix multiplications. In this specific benchmark, the measured
+speedup is primarily from hardware utilization (arithmetic intensity, data reuse,
+and parallelism), not from a better asymptotic complexity class. In other words,
+this is about making the same transformation workload more accelerator-friendly.
+
+Running this benchmark on GB10 GPU (DGX Spark) shows:
+Device: cuda
+Numerical Difference between methods: 9.78e-05
+Sequential Execution Time: 0.325 ms
+WY Execution Time:         0.017 ms
+Speedup Factor:            19.01x
+
+"""
