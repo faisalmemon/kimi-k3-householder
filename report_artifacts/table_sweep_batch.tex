@@ -1,0 +1,16 @@
+\begin{table}[t]
+  \centering
+  \caption{Batch-size sweep at d=4096, C=16.}
+  \label{tab:sweep-batch}
+  \begin{tabular}{lrrrr}
+    \hline
+    batch & Seq ms & WY apply ms & Speedup apply & Break-even \\
+    \hline
+    1 & 0.3130 $\pm$ 0.0013 & 0.0185 $\pm$ 0.0000 & 16.92x & 1.71 \\
+    4 & 0.3139 $\pm$ 0.0002 & 0.0165 $\pm$ 0.0002 & 19.01x & 1.70 \\
+    8 & 0.3142 $\pm$ 0.0013 & 0.0164 $\pm$ 0.0001 & 19.18x & 1.70 \\
+    16 & 0.3135 $\pm$ 0.0011 & 0.0165 $\pm$ 0.0001 & 19.05x & 1.70 \\
+    32 & 0.3213 $\pm$ 0.0045 & 0.0184 $\pm$ 0.0041 & 17.43x & 1.69 \\
+    \hline
+  \end{tabular}
+\end{table}

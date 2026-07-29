@@ -1,0 +1,6 @@
+Key findings (GPU):
+- In the C sweep (d=4096, batch=8), apply-only speedup increases with C and peaks at 74.89x (C=64).
+- Including one-time WY build cost, the best single-pass total speedup in the C sweep is 0.61x (C=64).
+- In the batch sweep (d=4096, C=16), the smallest break-even point is 1.69 applies (batch=32).
+- Numerical agreement is strong in absolute terms; relative error can become large when reference values are near zero.
+- Maximum observed mean relative error across sweeps: 2.59e+00.

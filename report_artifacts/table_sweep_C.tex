@@ -1,0 +1,16 @@
+\begin{table}[t]
+  \centering
+  \caption{Chunk-size sweep at d=4096, batch=8.}
+  \label{tab:sweep-c}
+  \begin{tabular}{lrrrrr}
+    \hline
+    C & Seq ms & WY build ms & WY apply ms & Speedup apply & Speedup total \\
+    \hline
+    4 & 0.0828 $\pm$ 0.0009 & 0.1227 $\pm$ 0.0038 & 0.0173 $\pm$ 0.0020 & 4.78x & 0.59x \\
+    8 & 0.1589 $\pm$ 0.0014 & 0.2468 $\pm$ 0.0010 & 0.0163 $\pm$ 0.0001 & 9.73x & 0.60x \\
+    16 & 0.3145 $\pm$ 0.0015 & 0.5031 $\pm$ 0.0009 & 0.0165 $\pm$ 0.0001 & 19.12x & 0.61x \\
+    32 & 0.6222 $\pm$ 0.0036 & 1.0182 $\pm$ 0.0025 & 0.0164 $\pm$ 0.0000 & 37.85x & 0.60x \\
+    64 & 1.2423 $\pm$ 0.0047 & 2.0173 $\pm$ 0.0052 & 0.0166 $\pm$ 0.0002 & 74.89x & 0.61x \\
+    \hline
+  \end{tabular}
+\end{table}
