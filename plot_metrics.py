@@ -56,37 +56,6 @@ def group_by(rows, key):
     return out
 
 
-def save_speedup_figure(rows, out_path):
-    batches = sorted({int(r["batch"]) for r in rows})
-    dims = sorted({int(r["d"]) for r in rows})
-    c_values = sorted({int(r["C"]) for r in rows})
-
-    fig, axes = plt.subplots(1, len(batches), figsize=(4.8 * len(batches), 4.6), sharey=True)
-    if len(batches) == 1:
-        axes = [axes]
-
-    for idx, (ax, batch) in enumerate(zip(axes, batches)):
-        batch_rows = [r for r in rows if int(r["batch"]) == batch]
-        for d in dims:
-            d_rows = sorted([r for r in batch_rows if int(r["d"]) == d], key=lambda x: x["C"])
-            x = [int(r["C"]) for r in d_rows]
-            y = [float(r["speedup_including_upfront"]) for r in d_rows]
-            ax.plot(x, y, marker="o", linewidth=2, label=f"d={d}")
-
-        ax.set_title(f"batch={batch}", fontsize=10, pad=8)
-        ax.set_xlabel("C (number of updates)")
-        ax.set_xticks(c_values)
-        ax.tick_params(axis="x", labelrotation=30)
-        ax.grid(True, linestyle="--", alpha=0.35)
-        if idx == 0:
-            ax.legend(loc="upper left", frameon=False, fontsize=9)
-
-    axes[0].set_ylabel("Speedup vs sequential (including WY upfront)")
-    fig.tight_layout()
-    fig.savefig(out_path, bbox_inches="tight")
-    plt.close(fig)
-
-
 def save_speedup_logx_figure(rows, out_path):
     batches = sorted({int(r["batch"]) for r in rows})
     dims = sorted({int(r["d"]) for r in rows})
@@ -194,13 +163,6 @@ def write_latex_snippet(out_dir):
 % \\usepackage{graphicx}
 
 \\begin{figure}[t]
-  \\centering
-  \\includegraphics[width=\\linewidth]{fig_speedup_vs_C.pdf}
-  \\caption{WY speedup (including amortized upfront build) as a function of C for each batch and d.}
-  \\label{fig:wy-speedup}
-\\end{figure}
-
-\\begin{figure}[t]
     \\centering
     \\includegraphics[width=\\linewidth]{fig_speedup_vs_C_logx.pdf}
     \\caption{Same speedup plot with a log2 x-axis for clearer comparison across small and large C.}
@@ -229,12 +191,6 @@ def main():
     parser = argparse.ArgumentParser(description="Create PDF plots from householder metrics CSV.")
     parser.add_argument("--input", default="householder_metrics.csv", help="Path to metrics CSV")
     parser.add_argument("--outdir", default="figures", help="Directory for generated plots")
-    parser.add_argument(
-        "--speedup-scale",
-        choices=["both", "linear", "logx"],
-        default="both",
-        help="Which speedup figure(s) to emit.",
-    )
     args = parser.parse_args()
 
     os.makedirs(args.outdir, exist_ok=True)
@@ -242,19 +198,21 @@ def main():
     if not rows:
         raise RuntimeError("No rows found in CSV")
 
-    if args.speedup_scale in ("both", "linear"):
-        save_speedup_figure(rows, os.path.join(args.outdir, "fig_speedup_vs_C.pdf"))
-    if args.speedup_scale in ("both", "logx"):
-        save_speedup_logx_figure(rows, os.path.join(args.outdir, "fig_speedup_vs_C_logx.pdf"))
+    c_values = sorted({int(r["C"]) for r in rows})
+    if len(c_values) < 2:
+        print(
+            "Skipping plot generation: input is not a C-sweep (only one C value). "
+            "This script now only emits focused C-sweep figures."
+        )
+        return
+
+    save_speedup_logx_figure(rows, os.path.join(args.outdir, "fig_speedup_vs_C_logx.pdf"))
     save_latency_figure(rows, os.path.join(args.outdir, "fig_latency_vs_C.pdf"))
     save_break_even_figure(rows, os.path.join(args.outdir, "fig_break_even.pdf"))
     write_latex_snippet(args.outdir)
 
     print(f"Generated figures in {args.outdir}:")
-    if args.speedup_scale in ("both", "linear"):
-        print("- fig_speedup_vs_C.pdf")
-    if args.speedup_scale in ("both", "logx"):
-        print("- fig_speedup_vs_C_logx.pdf")
+    print("- fig_speedup_vs_C_logx.pdf")
     print("- fig_latency_vs_C.pdf")
     print("- fig_break_even.pdf")
     print("- latex_figures_snippet.tex")
