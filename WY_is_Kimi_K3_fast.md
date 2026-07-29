@@ -1,5 +1,7 @@
 # WY is Kimi K3 Fast?
 
+![kimi_k3_wy.png](./kimi_k3_wy.png)
+
 This article explains why (or rather WY) the Kimi K3 model is so fast.
 
 It is well known that the bottle neck for intelligent systems is computing "Attention" - the heart of how a LLM figures out the nuance and relationship between words (tokens).
