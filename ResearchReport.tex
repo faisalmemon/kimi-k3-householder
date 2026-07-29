@@ -12,7 +12,7 @@
 \title{Kernel-Level Speedup via the WY Representation\\
        in Kimi Delta Attention:\\
        A Focused Reproducibility Benchmark}
-\author{}
+\author{Faisal Memon}
 \date{July 2026}
 
 \begin{document}
@@ -143,21 +143,28 @@ We sweep $C \in \{4, 8, 16, 32, 64\}$ at fixed $d = 4096$, batch $= 8$.
 Table~\ref{tab:sweep-c} reports mean timings and speedups over 5 independent trials
 of 100 iterations each.
 
+Three speedup figures are worth distinguishing:
+\begin{itemize}
+  \item \textbf{Apply-only speedup:} WY apply vs.~sequential apply; ignores build cost entirely. Upper bound.
+  \item \textbf{Amortised speedup (100 applies):} build cost divided equally across 100 applies, then added to WY apply. The practically relevant figure for any workload that reuses the representation.
+  \item \textbf{Single-pass speedup:} build + apply vs.~sequential; this is below 1$\times$ because the WY build takes roughly $1.6\times$ longer than one sequential apply. It is the worst-case scenario (build once, use once).
+\end{itemize}
+
 \begin{table}[t]
   \centering
   \caption{Chunk-size sweep at $d=4096$, batch$=8$. Times are mean $\pm$ std over 5
-           trials (ms). \emph{Speedup apply} is apply-only (upper bound);
-           \emph{Speedup total} includes one WY build amortised over 100 applies.}
+           trials (ms). \emph{Speedup (apply only)} ignores build cost.
+           \emph{Speedup (amortised, 100 applies)} spreads build cost over 100 reuses.}
   \label{tab:sweep-c}
-  \begin{tabular}{lrrrrr}
+  \begin{tabular}{lrrrr}
     \hline
-    $C$ & Seq (ms) & WY build (ms) & WY apply (ms) & Speedup (apply) & Speedup (total) \\
+    $C$ & Seq (ms) & WY apply (ms) & Speedup (apply only) & Speedup (amortised, 100) \\
     \hline
-    4  & $0.0828 \pm 0.0009$ & $0.1227 \pm 0.0038$ & $0.0173 \pm 0.0020$ & $4.78\times$  & $0.59\times$ \\
-    8  & $0.1589 \pm 0.0014$ & $0.2468 \pm 0.0010$ & $0.0163 \pm 0.0001$ & $9.73\times$  & $0.60\times$ \\
-    16 & $0.3145 \pm 0.0015$ & $0.5031 \pm 0.0009$ & $0.0165 \pm 0.0001$ & $19.12\times$ & $0.61\times$ \\
-    32 & $0.6222 \pm 0.0036$ & $1.0182 \pm 0.0025$ & $0.0164 \pm 0.0000$ & $37.85\times$ & $0.60\times$ \\
-    64 & $1.2423 \pm 0.0047$ & $2.0173 \pm 0.0052$ & $0.0166 \pm 0.0002$ & $74.89\times$ & $0.61\times$ \\
+    4  & $0.0828 \pm 0.0009$ & $0.0173 \pm 0.0020$ & $4.78\times$  & $4.47\times$ \\
+    8  & $0.1589 \pm 0.0014$ & $0.0163 \pm 0.0001$ & $9.73\times$  & $8.45\times$ \\
+    16 & $0.3145 \pm 0.0015$ & $0.0165 \pm 0.0001$ & $19.12\times$ & $14.64\times$ \\
+    32 & $0.6222 \pm 0.0036$ & $0.0164 \pm 0.0000$ & $37.85\times$ & $23.37\times$ \\
+    64 & $1.2423 \pm 0.0047$ & $0.0166 \pm 0.0002$ & $74.89\times$ & $33.79\times$ \\
     \hline
   \end{tabular}
 \end{table}
@@ -166,11 +173,10 @@ Two observations stand out. First, WY apply latency is essentially constant at
 approximately $0.017$~ms regardless of $C$, while sequential latency grows
 proportionally with $C$. This confirms the theoretical prediction: the WY apply is
 two GEMMs of size $(b \times C)$ and $(C \times d)$, and for $C \ll d$ these are
-dominated by the fixed cost of touching $S$. Second, the total-cost speedup
-(build + one apply) is consistently around $0.60\times$, below one. This is
-\emph{expected}: the build must be paid before any reuse occurs. As soon as the
-representation is applied more than $\approx 1.7$ times, the cumulative saving
-exceeds the build cost.
+dominated by the fixed cost of touching $S$. Second, the amortised speedup
+(spreading the build over 100 applies) ranges from $4.5\times$ at $C=4$ to
+$33.8\times$ at $C=64$, well above one. The build cost is recovered in under
+2 apply cycles, so even a modest reuse count yields a strong net gain.
 
 \subsection{Latency Decomposition}
 
