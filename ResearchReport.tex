@@ -258,10 +258,6 @@ here and remains negligible for the rank-1 update magnitudes in use.
   \item \textbf{Single hardware platform.} All measurements are from an NVIDIA GB10
         GPU (NVIDIA DGX Spark). Results may not generalise to other GPU
         architectures.
-  \item \textbf{fp32 precision only.} Production inference typically uses bf16 or
-        fp16. \emph{This benchmark now uses bf16 by default}, matching production
-        precision and enabling Tensor-Core utilisation. A comparison with fp32
-        baselines is left as future work.
 \end{enumerate}
 
 % -----------------------------------------------------------------------
@@ -302,18 +298,6 @@ A fixed random seed (\texttt{torch.manual\_seed(42)}) is set at the start of eac
 trial, with a per-case offset to ensure independent trials. Timing uses
 \texttt{time.perf\_counter} with \texttt{torch.cuda.synchronize()} barriers and
 10-iteration GPU warmup before measurement.
-
-% -----------------------------------------------------------------------
-\section{Next Steps}
-\label{sec:next}
-
-\begin{enumerate}
-  \item Benchmark with half-precision inputs (bf16/fp16) to match production inference.
-  \item Compare against a fused Triton kernel for the combined sequential operation.
-  \item Extend to simulate the intra-chunk vs inter-chunk split from the KDA paper.
-  \item Measure the second KDA speedup (KV-cache reduction) using a sequence-level
-        simulation.
-\end{enumerate}
 
 % -----------------------------------------------------------------------
 \begin{thebibliography}{9}
