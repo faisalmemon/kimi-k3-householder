@@ -64,8 +64,8 @@ def sync_if_needed(device):
 
 
 def time_avg(fn, repeats, device):
+    out = fn()
     start = time.perf_counter()
-    out = None
     for _ in range(repeats):
         out = fn()
     sync_if_needed(device)
@@ -149,7 +149,7 @@ def main():
         )
     )
     parser.add_argument("--d-values", type=parse_int_list, default=[1024, 2048, 4096])
-    parser.add_argument("--C-values", type=parse_int_list, default=[8, 16, 32])
+    parser.add_argument("--C-values", type=parse_int_list, default=[8, 16, 32, 64, 128, 256])
     parser.add_argument("--batch-values", type=parse_int_list, default=[4, 8, 16])
     parser.add_argument("--iters", type=int, default=100)
     parser.add_argument("--warmup-iters", type=int, default=10)
