@@ -33,14 +33,6 @@ def group_by(rows, key):
     return out
 
 
-def finalize_multi_panel_layout(fig, legend, title):
-    # Keep title area and legend separate to avoid collisions in exported PDFs.
-    fig.suptitle(title, y=0.975, fontsize=12)
-    if legend is not None:
-        legend.set_bbox_to_anchor((0.5, 0.02))
-    fig.tight_layout(rect=(0, 0.10, 1, 0.90))
-
-
 def save_speedup_figure(rows, out_path):
     batches = sorted({int(r["batch"]) for r in rows})
     dims = sorted({int(r["d"]) for r in rows})
@@ -50,7 +42,7 @@ def save_speedup_figure(rows, out_path):
     if len(batches) == 1:
         axes = [axes]
 
-    for ax, batch in zip(axes, batches):
+    for idx, (ax, batch) in enumerate(zip(axes, batches)):
         batch_rows = [r for r in rows if int(r["batch"]) == batch]
         for d in dims:
             d_rows = sorted([r for r in batch_rows if int(r["d"]) == d], key=lambda x: x["C"])
@@ -63,12 +55,11 @@ def save_speedup_figure(rows, out_path):
         ax.set_xticks(c_values)
         ax.tick_params(axis="x", labelrotation=30)
         ax.grid(True, linestyle="--", alpha=0.35)
+        if idx == 0:
+            ax.legend(loc="upper left", frameon=False, fontsize=9)
 
     axes[0].set_ylabel("Speedup vs sequential (including WY upfront)")
-    handles, labels = axes[0].get_legend_handles_labels()
-    legend_cols = min(len(dims), 4)
-    legend = fig.legend(handles, labels, loc="lower center", ncol=legend_cols, frameon=False)
-    finalize_multi_panel_layout(fig, legend, "Householder WY Speedup Across C")
+    fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
 
@@ -82,7 +73,7 @@ def save_speedup_logx_figure(rows, out_path):
     if len(batches) == 1:
         axes = [axes]
 
-    for ax, batch in zip(axes, batches):
+    for idx, (ax, batch) in enumerate(zip(axes, batches)):
         batch_rows = [r for r in rows if int(r["batch"]) == batch]
         for d in dims:
             d_rows = sorted([r for r in batch_rows if int(r["d"]) == d], key=lambda x: x["C"])
@@ -96,12 +87,11 @@ def save_speedup_logx_figure(rows, out_path):
         ax.set_title(f"batch={batch}", fontsize=10, pad=8)
         ax.set_xlabel("C (log2 scale)")
         ax.grid(True, linestyle="--", alpha=0.35, which="both")
+        if idx == 0:
+            ax.legend(loc="upper left", frameon=False, fontsize=9)
 
     axes[0].set_ylabel("Speedup vs sequential (including WY upfront)")
-    handles, labels = axes[0].get_legend_handles_labels()
-    legend_cols = min(len(dims), 4)
-    legend = fig.legend(handles, labels, loc="lower center", ncol=legend_cols, frameon=False)
-    finalize_multi_panel_layout(fig, legend, "Householder WY Speedup Across C (Log-X)")
+    fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
 
@@ -117,7 +107,7 @@ def save_latency_figure(rows, out_path):
 
     target_batch = batches[len(batches) // 2]
 
-    for ax, d in zip(axes, dims):
+    for idx, (ax, d) in enumerate(zip(axes, dims)):
         d_rows = [r for r in rows if int(r["d"]) == d and int(r["batch"]) == target_batch]
         d_rows = sorted(d_rows, key=lambda x: x["C"])
 
@@ -135,11 +125,11 @@ def save_latency_figure(rows, out_path):
         ax.set_xticks(c_values)
         ax.tick_params(axis="x", labelrotation=30)
         ax.grid(True, linestyle="--", alpha=0.35)
+        if idx == 0:
+            ax.legend(loc="upper left", frameon=False, fontsize=9)
 
     axes[0].set_ylabel("Latency (ms)")
-    handles, labels = axes[0].get_legend_handles_labels()
-    legend = fig.legend(handles, labels, loc="lower center", ncol=3, frameon=False)
-    finalize_multi_panel_layout(fig, legend, "Apply Latency Comparison")
+    fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
 
