@@ -21,7 +21,30 @@ def load_rows(path):
     with open(path, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for raw in reader:
-            row = {k: to_number(v) if k != "device" else v for k, v in raw.items()}
+            row = {}
+            for k, v in raw.items():
+                if k in {"device", "gpu_name", "torch_version", "cuda_version"}:
+                    row[k] = v
+                    continue
+                try:
+                    row[k] = to_number(v)
+                except ValueError:
+                    row[k] = v
+
+            # Backward/forward compatibility: normalize to common plotting keys.
+            if "seq_apply_ms" not in row and "seq_apply_ms_mean" in row:
+                row["seq_apply_ms"] = row["seq_apply_ms_mean"]
+            if "wy_apply_ms" not in row and "wy_apply_ms_mean" in row:
+                row["wy_apply_ms"] = row["wy_apply_ms_mean"]
+            if "upfront_build_ms" not in row and "wy_build_ms_mean" in row:
+                row["upfront_build_ms"] = row["wy_build_ms_mean"]
+            if "speedup_including_upfront" not in row and "speedup_total_once" in row:
+                # In research sweeps this is the realistic one-pass speedup.
+                row["speedup_including_upfront"] = row["speedup_total_once"]
+            if "wy_effective_apply_ms" not in row and "amortized_upfront_ms_per_apply" in row:
+                row["wy_effective_apply_ms"] = (
+                    float(row["wy_apply_ms"]) + float(row["amortized_upfront_ms_per_apply"])
+                )
             rows.append(row)
     return rows
 
