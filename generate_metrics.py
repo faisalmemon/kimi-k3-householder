@@ -15,15 +15,15 @@ def run_sequential(S, V, beta):
     for j in range(C):
         v_j = V[j]
         b_j = beta[j]
-        proj = torch.matmul(S_curr, v_j)
-        S_curr = S_curr - b_j * torch.outer(proj, v_j)
+        proj = torch.matmul(S_curr, v_j.to(S_curr.dtype))
+        S_curr = S_curr - b_j.to(S_curr.dtype) * torch.outer(proj, v_j.to(S_curr.dtype))
     return S_curr
 
 
 def build_WY(V, beta):
     d_dim, C_dim = V.shape[1], V.shape[0]
-    W = torch.zeros(d_dim, C_dim, device=V.device)
-    Y = torch.zeros(d_dim, C_dim, device=V.device)
+    W = torch.zeros(d_dim, C_dim, device=V.device, dtype=V.dtype)
+    Y = torch.zeros(d_dim, C_dim, device=V.device, dtype=V.dtype)
 
     W[:, 0] = beta[0] * V[0]
     Y[:, 0] = V[0]
@@ -108,10 +108,10 @@ def benchmark_case(d, C, batch, args, device):
         case_seed = args.seed + d * 1_000_003 + C * 9_173 + batch * 101 + trial * 97
         torch.manual_seed(case_seed)
 
-        V = torch.randn(C, d, device=device)
+        V = torch.randn(C, d, device=device, dtype=args.torch_dtype)
         V = V / torch.norm(V, dim=-1, keepdim=True)
-        beta = torch.rand(C, device=device)
-        S = torch.randn(batch, d, device=device)
+        beta = torch.rand(C, device=device, dtype=args.torch_dtype)
+        S = torch.randn(batch, d, device=device, dtype=args.torch_dtype)
 
         # Warm up kernels and memory allocations.
         W_warm, Y_warm = build_WY(V, beta)
@@ -165,6 +165,7 @@ def benchmark_case(d, C, batch, args, device):
         "gpu_name": env["gpu_name"],
         "torch_version": env["torch_version"],
         "cuda_version": env["cuda_version"],
+        "dtype": str(args.torch_dtype),
         "d": d,
         "C": C,
         "batch": batch,
@@ -220,7 +221,11 @@ def main():
     parser.add_argument("--sweep", choices=["none", "C", "d", "batch", "all"], default="none")
     parser.add_argument("--results-dir", type=str, default="results")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
+    parser.add_argument("--dtype", choices=["fp32", "bf16", "fp16"], default="bf16")
     args = parser.parse_args()
+
+    dtype_map = {"fp32": torch.float32, "bf16": torch.bfloat16, "fp16": torch.float16}
+    args.torch_dtype = dtype_map[args.dtype]
 
     if args.device == "cuda":
         if not torch.cuda.is_available():
@@ -277,6 +282,7 @@ def main():
     print(f"  torch_version: {env['torch_version']}")
     print(f"  cuda_available: {env['cuda_available']}")
     print(f"  cuda_version: {env['cuda_version']}")
+    print(f"  dtype: {args.dtype}")
 
     if args.sweep == "none":
         run_grid_and_write(args.d_values, args.C_values, args.batch_values, args.output)

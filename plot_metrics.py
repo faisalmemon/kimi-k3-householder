@@ -82,7 +82,7 @@ def save_speedup_logx_figure(rows, out_path):
         if idx == 0:
             ax.legend(loc="upper left", frameon=False, fontsize=9)
 
-    axes[0].set_ylabel("Speedup vs sequential (including WY upfront)")
+    axes[0].set_ylabel("Speedup vs sequential (amortised over 100 applies)")
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
@@ -165,7 +165,7 @@ def write_latex_snippet(out_dir):
 \\begin{figure}[t]
     \\centering
     \\includegraphics[width=\\linewidth]{fig_speedup_vs_C_logx.pdf}
-    \\caption{Same speedup plot with a log2 x-axis for clearer comparison across small and large C.}
+    \\caption{Amortised speedup (WY build cost spread over 100 applies) vs sequential as a function of $C$ on a log-2 axis.}
     \\label{fig:wy-speedup-logx}
 \\end{figure}
 
