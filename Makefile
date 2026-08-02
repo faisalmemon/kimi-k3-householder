@@ -13,8 +13,8 @@ all: pdf arxiv
 pdf: $(PAPER).pdf
 
 $(PAPER).pdf: $(PAPER).tex $(STY) $(FIGURES)
-	$(PDFLATEX) $(PAPER).tex
-	$(PDFLATEX) $(PAPER).tex
+	$(PDFLATEX) $(PAPER).tex | grep -E "^!|Warning|Error|Output written" || true
+	$(PDFLATEX) $(PAPER).tex | grep -E "^!|Warning|Error|Output written" || true
 
 arxiv: $(ARXIV_ZIP)
 

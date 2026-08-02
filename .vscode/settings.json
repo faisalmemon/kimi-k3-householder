@@ -1,5 +1,6 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:system",
+    "latex-workshop.formatting.latex": "latexindent",
     "chat.tools.terminal.autoApprove": {
         "/^python /workspace/plot_metrics\\.py --input /workspace/householder_metrics_largeC\\.csv --outdir /workspace/figures_largeC --speedup-scale both$/": {
             "approve": true,
