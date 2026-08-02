@@ -16,7 +16,7 @@ Now let us take the unit matrix, and chip a little bit off.  Then multiply it by
 
 Now coming up with these magic W and Y matrices is not easy, but is is easy for a GPU (math heavy, data light).  What is hard for a GPU is constantly shunting memory to and from the GPU.  This happens in the sequential case.  But in the shortcut case, you just shunt over the data once.
 
-So this is the magic of WY the Kimi K3 model is so fast.  It is why the model can be served cheaply to customers.  Its all about the memory transfer wall and avoiding it.
+So this is the magic of WY the Kimi K3 model is so fast.  It is why the model can be served cheaply to customers.  It's all about the memory transfer wall and avoiding it.
 
 ## Deja Vu all over again
 
