@@ -1,19 +1,23 @@
-\documentclass[11pt,a4paper]{article}
-
-\usepackage[margin=2.5cm]{geometry}
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
-\usepackage{hyperref}
 \usepackage{microtype}
-\usepackage{parskip}
 
-\title{Kernel-Level Speedup via the WY Representation\\
-       in Kimi Delta Attention:\\
-       A Focused Reproducibility Benchmark}
-\author{Faisal Memon}
-\date{July 2026}
+%\nipsfinalcopy % Uncomment for camera-ready version
+
+\title{Kernel-Level Speedup via the WY Representation
+in Kimi Delta Attention:
+A Focused Reproducibility Benchmark}
+
+\author{
+Faisal Memon \\
+\texttt{faisal@example.com} \\
+}
 
 \begin{document}
 
@@ -40,7 +44,7 @@ The WY build cost is recovered after fewer than two reuse cycles for all $C \geq
 
 Kimi K3 is a 2.8-trillion-parameter mixture-of-experts model released in July 2026.
 Its attention mechanism, Kimi Delta Attention (KDA), is described in the Kimi Linear
-technical report \cite{kimilinear} as achieving two distinct efficiency improvements
+technical report [1] as achieving two distinct efficiency improvements
 over standard attention:
 
 \begin{enumerate}
@@ -97,7 +101,7 @@ with $C$ sequential memory round-trips.
 
 \subsection{The WY Representation}
 
-Bischof and Van Loan \cite{bischof1987} showed that the product of $C$ Householder
+Bischof and Van Loan [2] showed that the product of $C$ Householder
 reflectors can be expressed in compact form:
 \[
   H_1 H_2 \cdots H_C = I - W Y^\top,
@@ -305,24 +309,22 @@ trial, with a per-case offset to ensure independent trials. Timing uses
 \texttt{time.perf\_counter} with \texttt{torch.cuda.synchronize()} barriers and
 10-iteration GPU warmup before measurement.
 
-% -----------------------------------------------------------------------
-\begin{thebibliography}{9}
+\subsubsection*{References}
 
-\bibitem{kimilinear}
-Kimi Team.
+\small{
+[1] Kimi Team.
 \textit{Kimi Linear: Scaling Up Linear Recurrent Models}.
 arXiv:2510.26692, 2025.
 
-\bibitem{bischof1987}
-C.~Bischof and C.~Van Loan.
+[2] C.~Bischof and C.~Van Loan.
 \textit{The WY Representation for Products of Householder Matrices}.
 SIAM Journal on Scientific and Statistical Computing, 8(1):s2--s13, 1987.
 
-\bibitem{lawson1979}
-C.~L.~Lawson, R.~J.~Hanson, D.~R.~Kincaid, and F.~T.~Krogh.
+[3] C.~L.~Lawson, R.~J.~Hanson, D.~R.~Kincaid, and F.~T.~Krogh.
 \textit{Basic Linear Algebra Subprograms for Fortran Usage}.
 ACM Transactions on Mathematical Software, 5(3):308--323, 1979.
+}
 
-\end{thebibliography}
+}
 
 \end{document}
